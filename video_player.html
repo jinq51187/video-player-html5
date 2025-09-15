@@ -404,7 +404,7 @@
         }
 
         .next-episode-btn {
-            bottom: 125px;
+            bottom: 120px;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -642,6 +642,10 @@
     </div>
 
     <script>
+    	const TIMING_CONFIG = {
+            introEnd: 12,     // Intro ends at 30 seconds for all episodes
+            outroStart: 10    // Outro starts at 50 seconds for all episodes
+        };
         const video = document.getElementById('mainVideo');
         const videoContainer = document.getElementById('videoContainer');
         const playBtn = document.getElementById('playBtn');
@@ -668,9 +672,9 @@
         let showSubtitles = true;
         let currentSubtitleLanguage = 'vi';
         let skipButtonClicked = false; // Flag to track if skip button was clicked
-    // Timing state for progress saving and updates
-    let lastTime = 0;
-    let lastTimeUpdate = Date.now();
+	    // Timing state for progress saving and updates
+	    let lastTime = 0;
+	    let lastTimeUpdate = Date.now();
 
         // Enhanced subtitles with multiple languages
         const subtitles = {
@@ -696,11 +700,11 @@
 
         // Episode data - Thông tin chi tiết về từng tập
         const episodeData = {
-            1: {title: "Tập 1: Khởi đầu hành trình", duration: "50:58", introEnd: 30, outroStart: 50},
-            2: {title: "Tập 2: Tu luyện đầu tiên", duration: "48:32", introEnd: 25, outroStart: 45},
-            3: {title: "Tập 3: Gặp gỡ sư phụ", duration: "52:15", introEnd: 35, outroStart: 55},
-            4: {title: "Tập 4: Thử thách đầu tiên", duration: "49:43", introEnd: 28, outroStart: 48},
-            5: {title: "Tập 5: Bí thuật tu tiên", duration: "51:28", introEnd: 32, outroStart: 52}
+            1: {title: "Tập 1: Khởi đầu hành trình", duration: "50:58", introEnd: TIMING_CONFIG.introEnd, outroStart: TIMING_CONFIG.outroStart},
+            2: {title: "Tập 2: Tu luyện đầu tiên", duration: "48:32", introEnd: TIMING_CONFIG.introEnd, outroStart: TIMING_CONFIG.outroStart},
+            3: {title: "Tập 3: Gặp gỡ sư phụ", duration: "52:15", introEnd: TIMING_CONFIG.introEnd, outroStart: TIMING_CONFIG.outroStart},
+            4: {title: "Tập 4: Thử thách đầu tiên", duration: "49:43", introEnd: TIMING_CONFIG.introEnd, outroStart: TIMING_CONFIG.outroStart},
+            5: {title: "Tập 5: Bí thuật tu tiên", duration: "51:28", introEnd: TIMING_CONFIG.introEnd, outroStart: TIMING_CONFIG.outroStart}
         };
 
         // Initialize episode click handler
@@ -933,11 +937,11 @@
             markersContainer.innerHTML = '';
 
             // Hiển thị marker cho phần "Bỏ qua giới thiệu" (0-10 giây)
-            if (video.currentTime < 10) {
+            if (video.currentTime < TIMING_CONFIG.introEnd) {
                 const introMarker = document.createElement('div');
                 introMarker.className = 'progress-marker';
                 introMarker.style.left = '0%';
-                introMarker.style.width = (10 / video.duration * 100) + '%';
+                introMarker.style.width = (TIMING_CONFIG.introEnd / video.duration * 100) + '%';
                 markersContainer.appendChild(introMarker);
             }
 
@@ -945,7 +949,7 @@
             const outroMarker = document.createElement('div');
             outroMarker.className = 'progress-marker';
             outroMarker.style.right = '0%';
-            outroMarker.style.width = (10 / video.duration * 100) + '%';
+            outroMarker.style.width = (TIMING_CONFIG.outroStart / video.duration * 100) + '%';
             markersContainer.appendChild(outroMarker);
         }
 
@@ -1551,7 +1555,7 @@
             }
 
             // Hiển thị nút trong 10 giây cuối
-            if (remainingTime > 0 && remainingTime <= 10) {
+            if (remainingTime > 0 && remainingTime <= TIMING_CONFIG.outroStart) {
                 // Nếu là tập áp chót, hiển thị "Tập cuối"
                 if (currentEpisode === totalEpisodes - 1) {
                     nextEpisodeBtn.querySelector('span').textContent = 'Tập cuối';
