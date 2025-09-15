@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phàm Nhân Tu Tiên Truyện - Tập 1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .video-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+            padding: 20px;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .video-container:hover .video-header,
+        .video-container.show-controls .video-header {
+            opacity: 1;
+        }
+
+        .video-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .video-subtitle {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+
+        .controls-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+            padding: 20px;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .video-container:hover .controls-overlay,
+        .video-container.show-controls .controls-overlay {
+            opacity: 1;
+        }
+
+        .progress-container {
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-filled {
+            height: 100%;
+            background: #ff6b6b;
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        .progress-markers {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .progress-marker {
+            position: absolute;
+            height: 100%;
+            background: rgba(255,255,255,0.8);
+        }
+
+        .progress-handle {
+            position: absolute;
+            top: -6px;
+            width: 16px;
+            height: 16px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            transform: translateX(-50%);
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .progress-bar:hover .progress-handle {
+            opacity: 1;
+        }
+
+        .controls-main {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .controls-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .controls-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-left: auto;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .play-btn {
+            font-size: 24px;
+        }
+
+        .time-display {
+            font-size: 14px;
+            color: rgba(255,255,255,0.8);
+            min-width: 100px;
+        }
+
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .volume-slider {
+            width: 60px;
+            height: 4px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .volume-filled {
+            height: 100%;
+            background: white;
+            border-radius: 2px;
+            width: 100%;
+        }
+
+        .subtitle-display {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 18px;
+            font-weight: 500;
+            text-align: center;
+            max-width: 80%;
+            line-height: 1.4;
+            display: none;
+        }
+
+        .settings-menu {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            background: rgba(40,40,40,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            min-width: 200px;
+            display: none;
+            z-index: 20;
+        }
+
+        .settings-menu.show {
+            display: block;
+        }
+
+        .settings-content {
+            padding: 10px;
+        }
+
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+        .settings-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .settings-item.active {
+            background: rgba(255,107,107,0.2);
+            color: #ff6b6b;
+        }
+
+        .checkmark {
+            color: #ff6b6b;
+            font-weight: bold;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .language-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .playlist-sidebar {
+            position: fixed;
+            top: 0;
+            left: -400px;
+            width: 400px;
+            height: 100vh;
+            background: rgba(20,20,20,0.95);
+            backdrop-filter: blur(10px);
+            transition: left 0.3s ease;
+            z-index: 30;
+            overflow-y: auto;
+        }
+
+        .playlist-sidebar.show {
+            left: 0;
+        }
+
+        .playlist-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .playlist-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .close-playlist {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .playlist-content {
+            padding: 20px;
+        }
+
+        .episode-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-bottom: 8px;
+        }
+
+        .episode-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .episode-item.active {
+            background: rgba(255,107,107,0.2);
+        }
+
+        .episode-thumb {
+            width: 80px;
+            height: 45px;
+            background: #333;
+            border-radius: 4px;
+            flex-shrink: 0;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 45"><rect width="80" height="45" fill="%23333"/><polygon points="30,15 30,30 45,22.5" fill="%23fff"/></svg>');
+        }
+
+        .episode-info {
+            flex: 1;
+        }
+
+        .episode-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .episode-duration {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .center-play-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            border: none;
+            color: white;
+            font-size: 60px;
+            padding: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 15;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-container.paused .center-play-btn {
+            opacity: 1;
+        }
+
+        .skip-intro-btn,
+        .next-episode-btn {
+            display: none;
+            position: fixed;
+            right: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .skip-intro-btn {
+            bottom: 140px;
+        }
+
+        .next-episode-btn {
+            bottom: 125px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .skip-intro-btn.show,
+        .next-episode-btn.show {
+            display: block !important;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .skip-intro-btn:hover,
+        .next-episode-btn:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .playlist-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 25;
+            display: none;
+        }
+
+        .playlist-overlay.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .playlist-sidebar {
+                width: 100vw;
+                left: -100vw;
+            }
+            
+            .controls-main {
+                gap: 10px;
+            }
+            
+            .video-title {
+                font-size: 18px;
+            }
+            
+            .settings-menu {
+                right: 10px;
+                min-width: 180px;
+            }
+        }
+
+        @keyframes slideDown {
+            from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="playlist-overlay" id="playlistOverlay"></div>
+
+    <div class="video-container" id="videoContainer">
+        <video id="mainVideo" preload="metadata">
+            <source src="https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4" type="video/mp4">
+        </video>
+
+        <div class="video-header">
+            <div class="video-title">Phàm Nhân Tu Tiên Truyện</div>
+            <div class="video-subtitle" style="padding-left: 20px">Phần 1 - Tập 1</div>
+        </div>
+
+        <button class="center-play-btn" id="centerPlayBtn" onclick="togglePlay()">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="8,5 8,19 19,12"/>
+            </svg>
+        </button>
+
+        <div class="skip-intro-container">
+            <div class="skip-intro-wrapper" style="position: absolute; z-index: 1000;">
+                <button class="skip-intro-btn" id="skipIntroBtn">
+                    <span>Bỏ qua giới thiệu</span>
+                </button>
+            </div>
+        </div>
+
+        <button class="next-episode-btn" id="nextEpisodeBtn" onclick="nextEpisode()">
+            <span>Tập tiếp theo</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5,3 19,12 5,21"/>
+            </svg>
+        </button>
+
+        <div class="subtitle-display" id="subtitleDisplay"></div>
+
+        <div class="controls-overlay">
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar" onclick="seekTo(event)">
+                    <div class="progress-filled" id="progressFilled"></div>
+                    <div class="progress-markers" id="progressMarkers"></div>
+                    <div class="progress-handle"></div>
+                </div>
+            </div>
+
+            <div class="controls-main">
+                <div class="controls-left">
+                    <button class="control-btn play-btn" id="playBtn" onclick="togglePlay()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <polygon points="8,5 8,19 19,12"/>
+                        </svg>
+                    </button>
+                    <button class="control-btn" onclick="skipTime(-10)" title="Tua lại 10s">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12,5V1L7,6L12,11V7A6,6 0 0,1 18,13A6,6 0 0,1 12,19A6,6 0 0,1 6,13H4A8,8 0 0,0 12,21A8,8 0 0,0 20,13A8,8 0 0,0 12,5Z"/>
+                            <text x="12" y="17" font-size="6" text-anchor="middle" fill="currentColor">10</text>
+                        </svg>
+                    </button>
+                    <button class="control-btn" onclick="skipTime(10)" title="Tua tới 10s">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12,5V1L17,6L12,11V7A6,6 0 0,0 6,13A6,6 0 0,0 12,19A6,6 0 0,0 18,13H20A8,8 0 0,1 12,21A8,8 0 0,1 4,13A8,8 0 0,1 12,5Z"/>
+                            <text x="12" y="17" font-size="6" text-anchor="middle" fill="currentColor">10</text>
+                        </svg>
+                    </button>
+                    <div class="volume-container">
+                        <button class="control-btn" id="volumeBtn" onclick="toggleMute()">🔊</button>
+                        <div class="volume-slider" onclick="setVolume(event)">
+                            <div class="volume-filled" id="volumeFilled"></div>
+                        </div>
+                    </div>
+                    <div class="time-display" id="timeDisplay">0:00 / 0:00</div>
+                </div>
+
+                <div class="controls-right">
+                    <button class="control-btn" id="subtitleBtn" onclick="toggleSubtitleMenu()">CC</button>
+                    <button class="control-btn" onclick="togglePlaylist()">📋</button>
+                    <button class="control-btn" id="qualityBtn" onclick="toggleQualityMenu()">1080P</button>
+                    <button class="control-btn" onclick="togglePip()">📺</button>
+                    <button class="control-btn" onclick="toggleFullscreen()">⛶</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-menu" id="qualityMenu">
+            <div class="settings-content">
+            	<div style="padding-bottom: 10px">Chất lượng</div>
+                <div class="settings-item active" data-quality="1080p" onclick="setQuality('1080p', this)">
+                    <span>1080P</span>
+                    <span class="checkmark">✓</span>
+                </div>
+                <div class="settings-item" data-quality="720p" onclick="setQuality('720p', this)">
+                    <span>720P</span>
+                    <span class="checkmark"></span>
+                </div>
+                <div class="settings-item" data-quality="480p" onclick="setQuality('480p', this)">
+                    <span>480P</span>
+                    <span class="checkmark"></span>
+                </div>
+                <div class="settings-item" data-quality="360p" onclick="setQuality('360p', this)">
+                    <span>360P</span>
+                    <span class="checkmark"></span>
+                </div>
+                <div class="settings-item" data-quality="auto" onclick="setQuality('Auto (480P)', this)">
+                    <span>Auto (480P)</span>
+                    <span class="checkmark"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-menu" id="subtitleMenu">
+            <div class="settings-content language-list">
+            	<div style="padding-bottom: 10px">Phụ đề</div>
+                <div class="settings-item" data-subtitle="off" onclick="setSubtitle('Tắt phụ đề', this, false)">
+                    <span>Tắt phụ đề</span>
+                    <span class="checkmark"></span>
+                </div>
+                <div class="settings-item active" data-subtitle="vi" onclick="setSubtitle('Tiếng Việt', this, true)">
+                    <span>Tiếng Việt</span>
+                    <span class="checkmark">✓</span>
+                </div>
+                <div class="settings-item" data-subtitle="en" onclick="setSubtitle('Tiếng Anh', this, true)">
+                    <span>Tiếng Anh</span>
+                    <span class="checkmark"></span>
+                </div>
+                <div class="settings-item" data-subtitle="cn" onclick="setSubtitle('Tiếng Trung', this, true)">
+                    <span>Tiếng Trung</span>
+                    <span class="checkmark"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="playlist-sidebar" id="playlistSidebar">
+        <div class="playlist-header">
+            <div class="playlist-title">📋 Danh sách tập</div>
+            <button class="close-playlist" onclick="togglePlaylist()">×</button>
+        </div>
+        <div class="playlist-content">
+            <div class="episode-item active" data-episode="1">
+                <div class="episode-thumb"></div>
+                <div class="episode-info">
+                    <div class="episode-name">Tập 1: Khởi đầu hành trình</div>
+                    <div class="episode-duration">50:58</div>
+                </div>
+            </div>
+            <div class="episode-item" data-episode="2">
+                <div class="episode-thumb"></div>
+                <div class="episode-info">
+                    <div class="episode-name">Tập 2: Tu luyện đầu tiên</div>
+                    <div class="episode-duration">48:32</div>
+                </div>
+            </div>
+            <div class="episode-item" data-episode="3">
+                <div class="episode-thumb"></div>
+                <div class="episode-info">
+                    <div class="episode-name">Tập 3: Gặp gỡ sư phụ</div>
+                    <div class="episode-duration">52:15</div>
+                </div>
+            </div>
+            <div class="episode-item" data-episode="4">
+                <div class="episode-thumb"></div>
+                <div class="episode-info">
+                    <div class="episode-name">Tập 4: Thử thách đầu tiên</div>
+                    <div class="episode-duration">49:43</div>
+                </div>
+            </div>
+            <div class="episode-item" data-episode="5">
+                <div class="episode-thumb"></div>
+                <div class="episode-info">
+                    <div class="episode-name">Tập 5: Bí thuật tu tiên</div>
+                    <div class="episode-duration">51:28</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('mainVideo');
+        const videoContainer = document.getElementById('videoContainer');
+        const playBtn = document.getElementById('playBtn');
+        const centerPlayBtn = document.getElementById('centerPlayBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFilled = document.getElementById('progressFilled');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const volumeBtn = document.getElementById('volumeBtn');
+        const volumeFilled = document.getElementById('volumeFilled');
+        const qualityMenu = document.getElementById('qualityMenu');
+        const subtitleMenu = document.getElementById('subtitleMenu');
+        const playlistSidebar = document.getElementById('playlistSidebar');
+        const subtitleDisplay = document.getElementById('subtitleDisplay');
+        const qualityBtn = document.getElementById('qualityBtn');
+        const subtitleBtn = document.getElementById('subtitleBtn');
+        const playlistOverlay = document.getElementById('playlistOverlay');
+        const nextEpisodeBtn = document.getElementById('nextEpisodeBtn');
+        // Sử dụng let thay vì const cho skipIntroBtn vì chúng ta sẽ gán lại giá trị cho nó
+        let skipIntroBtn = document.getElementById('skipIntroBtn');
+
+        let isPlaying = false;
+        let controlsTimeout;
+        let currentEpisode = 1;
+        let showSubtitles = true;
+        let currentSubtitleLanguage = 'vi';
+        let skipButtonClicked = false; // Flag to track if skip button was clicked
+    // Timing state for progress saving and updates
+    let lastTime = 0;
+    let lastTimeUpdate = Date.now();
+
+        // Enhanced subtitles with multiple languages
+        const subtitles = {
+            vi: [
+                {start: 2, end: 6, text: "Chào mừng đến với thế giới tu tiên"},
+                {start: 8, end: 12, text: "Hôm nay chúng ta sẽ bắt đầu hành trình"},
+                {start: 15, end: 20, text: "Đây là câu chuyện về một phàm nhân"},
+                {start: 22, end: 27, text: "Người đã vượt qua mọi thử thách"}
+            ],
+            en: [
+                {start: 2, end: 6, text: "Welcome to the world of cultivation"},
+                {start: 8, end: 12, text: "Today we begin our journey"},
+                {start: 15, end: 20, text: "This is the story of a mortal"},
+                {start: 22, end: 27, text: "Who overcame all challenges"}
+            ],
+            cn: [
+                {start: 2, end: 6, text: "欢迎来到修仙世界"},
+                {start: 8, end: 12, text: "今天我们开始我们的旅程"},
+                {start: 15, end: 20, text: "这是一个凡人的故事"},
+                {start: 22, end: 27, text: "他克服了所有挑战"}
+            ]
+        };
+
+        // Episode data - Thông tin chi tiết về từng tập
+        const episodeData = {
+            1: {title: "Tập 1: Khởi đầu hành trình", duration: "50:58", introEnd: 30, outroStart: 50},
+            2: {title: "Tập 2: Tu luyện đầu tiên", duration: "48:32", introEnd: 25, outroStart: 45},
+            3: {title: "Tập 3: Gặp gỡ sư phụ", duration: "52:15", introEnd: 35, outroStart: 55},
+            4: {title: "Tập 4: Thử thách đầu tiên", duration: "49:43", introEnd: 28, outroStart: 48},
+            5: {title: "Tập 5: Bí thuật tu tiên", duration: "51:28", introEnd: 32, outroStart: 52}
+        };
+
+        // Initialize episode click handler
+        const playlistContent = document.querySelector('.playlist-content');
+        if (playlistContent) {
+            playlistContent.addEventListener('click', function(e) {
+                // Find closest episode item if clicked on child element
+                const episodeItem = e.target.closest('.episode-item');
+                if (!episodeItem) return;
+
+                // Get episode number from data attribute
+                const episodeNum = parseInt(episodeItem.dataset.episode, 10);
+                if (!isNaN(episodeNum)) {
+                    selectEpisode(episodeNum);
+                }
+            });
+        }
+
+        // Setup skip button with proper event handling
+        function setupSkipButton() {
+            if (!skipIntroBtn) {
+                console.error('Skip button not found');
+                return;
+            }
+
+            // Remove any existing click handlers by cloning button
+            const wrapper = document.createElement('div');
+            wrapper.className = 'skip-intro-wrapper';
+            wrapper.style.position = 'absolute';
+            wrapper.style.zIndex = '1000';
+            
+            const newSkipBtn = skipIntroBtn.cloneNode(true);
+            const wasShowing = skipIntroBtn.classList.contains('show');
+            
+            wrapper.appendChild(newSkipBtn);
+            
+            if (skipIntroBtn.parentNode) {
+                skipIntroBtn.parentNode.replaceChild(wrapper, skipIntroBtn);
+            }
+            skipIntroBtn = newSkipBtn;
+
+            if (wasShowing) {
+                skipIntroBtn.classList.add('show');
+            }
+
+            // Add click handler to wrapper to ensure event isolation
+            wrapper.addEventListener('click', function(e) {
+                // Stop event immediately
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+
+                // Only handle clicks on the button or its children
+                if (e.target.closest('#skipIntroBtn')) {
+                    console.log('Skip button clicked:', {
+                        currentEpisode,
+                        currentTime: video.currentTime,
+                        introEnd: episodeData[currentEpisode]?.introEnd
+                    });
+
+                    skipIntro();
+                }
+
+                return false;
+            }, {
+                capture: true,    // Handle event in capture phase
+                passive: false,   // Allow preventDefault
+                once: false       // Keep handler active
+            });
+        }
+
+        // Initialize
+        video.addEventListener('loadedmetadata', function() {
+            console.log('Video loadedmetadata:', {
+                duration: video.duration,
+                currentTime: video.currentTime,
+                readyState: video.readyState,
+                currentEpisode: currentEpisode,
+                src: video.currentSrc
+            });
+            updateTimeDisplay();
+            loadSavedProgress();
+            
+            // Set up skip button with new event handling
+            setupSkipButton();
+        });
+
+        // Add event listener for checking video state
+        video.addEventListener('canplay', function() {
+            console.log('Video canplay event:', {
+                currentTime: video.currentTime,
+                currentEpisode: currentEpisode,
+                readyState: video.readyState
+            });
+            
+            // Video is ready to play — only show skip button when not currently skipping
+            // and within intro duration for current episode
+            const introEnd = episodeData[currentEpisode]?.introEnd;
+            if (!skipInProgress && introEnd && video.currentTime < introEnd) {
+                skipIntroBtn.classList.add('show');
+                console.log('Show skip intro button');
+            }
+        });
+
+        // Biến để kiểm soát việc bỏ qua intro
+        let skipInProgress = false;
+
+        // Hàm xử lý play/pause video
+        function togglePlay() {
+            if (video.paused) {
+                const playPromise = video.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.error('Error attempting to play:', error);
+                    });
+                }
+            } else {
+                video.pause();
+            }
+        }
+        
+        video.addEventListener('timeupdate', function() {
+            // Log on first timeupdate after loading
+            if (video.currentTime < 0.1) {
+                console.log('Video started playing:', {
+                    currentTime: video.currentTime,
+                    currentEpisode: currentEpisode,
+                    readyState: video.readyState,
+                    skipInProgress: skipInProgress,
+                    isSkipping: isSkipping
+                });
+            }
+            
+            lastTime = video.currentTime;
+            lastTimeUpdate = Date.now();
+            
+            // Nếu đang trong quá trình skip intro, chỉ cập nhật UI cần thiết
+            if (skipInProgress || isSkipping) {
+                updateProgress();
+                updateTimeDisplay();
+                return;
+            }
+            
+            updateProgress();
+            updateTimeDisplay();
+            updateSubtitles();
+            saveProgress();
+            checkIntroSkip();
+            checkNextEpisode();
+        });
+
+        video.addEventListener('play', function() {
+            isPlaying = true;
+            updatePlayButton(true);
+            videoContainer.classList.remove('paused');
+        });
+
+        video.addEventListener('pause', function() {
+            isPlaying = false;
+            updatePlayButton(false);
+            videoContainer.classList.add('paused');
+        });
+
+        function updatePlayButton(playing) {
+            const playIcon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="8,5 8,19 19,12"/></svg>`;
+            const pauseIcon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
+            
+            const centerPlayIcon = `<svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor"><polygon points="8,5 8,19 19,12"/></svg>`;
+            const centerPauseIcon = `<svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
+            
+            playBtn.innerHTML = playing ? pauseIcon : playIcon;
+            centerPlayBtn.innerHTML = playing ? centerPauseIcon : centerPlayIcon;
+        }
+
+        // Show/hide controls
+        videoContainer.addEventListener('mousemove', showControls);
+        videoContainer.addEventListener('mouseleave', hideControlsDelayed);
+
+        function showControls() {
+            videoContainer.classList.add('show-controls');
+            clearTimeout(controlsTimeout);
+            hideControlsDelayed();
+        }
+
+        function hideControlsDelayed() {
+            controlsTimeout = setTimeout(() => {
+                if (!qualityMenu.classList.contains('show') && 
+                    !subtitleMenu.classList.contains('show') && 
+                    !playlistSidebar.classList.contains('show')) {
+                    videoContainer.classList.remove('show-controls');
+                }
+            }, 3000);
+        }
+
+        function togglePlay() {
+            if (video.paused) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        }
+
+        function skipTime(seconds) {
+            video.currentTime = Math.max(0, Math.min(video.currentTime + seconds, video.duration));
+        }
+
+        function seekTo(event) {
+            const rect = progressBar.getBoundingClientRect();
+            const percent = (event.clientX - rect.left) / rect.width;
+            video.currentTime = percent * video.duration;
+        }
+
+        function updateProgress() {
+            if (video.duration) {
+                const percent = (video.currentTime / video.duration) * 100;
+                progressFilled.style.width = percent + '%';
+                
+                // Update progress handle position
+                const handle = progressBar.querySelector('.progress-handle');
+                if (handle) {
+                    handle.style.left = `${percent}%`;
+                }
+                
+                updateProgressMarkers();
+            }
+        }
+
+        function updateProgressMarkers() {
+            const markersContainer = document.getElementById('progressMarkers');
+            markersContainer.innerHTML = '';
+
+            // Hiển thị marker cho phần "Bỏ qua giới thiệu" (0-10 giây)
+            if (video.currentTime < 10) {
+                const introMarker = document.createElement('div');
+                introMarker.className = 'progress-marker';
+                introMarker.style.left = '0%';
+                introMarker.style.width = (10 / video.duration * 100) + '%';
+                markersContainer.appendChild(introMarker);
+            }
+
+            // Hiển thị marker cho phần "Tập tiếp theo" (10 giây cuối)
+            const outroMarker = document.createElement('div');
+            outroMarker.className = 'progress-marker';
+            outroMarker.style.right = '0%';
+            outroMarker.style.width = (10 / video.duration * 100) + '%';
+            markersContainer.appendChild(outroMarker);
+        }
+
+        function updateTimeDisplay() {
+            const current = formatTime(video.currentTime || 0);
+            const duration = formatTime(video.duration || 0);
+            timeDisplay.textContent = `${current} / ${duration}`;
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function toggleMute() {
+            video.muted = !video.muted;
+            volumeBtn.textContent = video.muted ? '🔇' : '🔊';
+            volumeFilled.style.width = video.muted ? '0%' : (video.volume * 100) + '%';
+        }
+
+        function setVolume(event) {
+            const rect = event.currentTarget.getBoundingClientRect();
+            const percent = (event.clientX - rect.left) / rect.width;
+            video.volume = Math.max(0, Math.min(1, percent));
+            video.muted = false;
+            volumeBtn.textContent = '🔊';
+            volumeFilled.style.width = (video.volume * 100) + '%';
+        }
+
+        function toggleQualityMenu() {
+            qualityMenu.classList.toggle('show');
+            subtitleMenu.classList.remove('show');
+            if (qualityMenu.classList.contains('show')) {
+                showControls();
+            }
+        }
+
+        function toggleSubtitleMenu() {
+            subtitleMenu.classList.toggle('show');
+            qualityMenu.classList.remove('show');
+            if (subtitleMenu.classList.contains('show')) {
+                showControls();
+            }
+        }
+
+        function setQuality(quality, element) {
+            // Remove active from all quality items
+            document.querySelectorAll('#qualityMenu .settings-item').forEach(item => {
+                item.classList.remove('active');
+                const checkmark = item.querySelector('.checkmark');
+                if (checkmark) {
+                    checkmark.textContent = '';
+                }
+            });
+            
+            // Set active on clicked item
+            element.classList.add('active');
+            const checkmark = element.querySelector('.checkmark');
+            if (checkmark) {
+                checkmark.textContent = '✓';
+            }
+            
+            // Update button text
+            qualityBtn.textContent = quality;
+            
+            showNotification(`Đã chuyển sang chất lượng ${quality}`);
+            qualityMenu.classList.remove('show');
+        }
+
+        function setSubtitle(language, element, enabled) {
+            // Remove active from all subtitle items
+            document.querySelectorAll('#subtitleMenu .settings-item').forEach(item => {
+                item.classList.remove('active');
+                const checkmark = item.querySelector('.checkmark');
+                if (checkmark) {
+                    checkmark.textContent = '';
+                }
+            });
+            
+            // Set active on clicked item
+            element.classList.add('active');
+            const checkmark = element.querySelector('.checkmark');
+            if (checkmark) {
+                checkmark.textContent = '✓';
+            }
+            
+            // Update subtitle state
+            showSubtitles = enabled;
+            if (enabled) {
+                currentSubtitleLanguage = element.getAttribute('data-subtitle');
+                subtitleDisplay.style.display = 'block';
+            } else {
+                subtitleDisplay.style.display = 'none';
+            }
+            
+            showNotification(`Đã chuyển phụ đề: ${language}`);
+            subtitleMenu.classList.remove('show');
+        }
+
+        function toggleSubtitles() {
+            showSubtitles = !showSubtitles;
+            subtitleDisplay.style.display = showSubtitles ? 'block' : 'none';
+            showNotification(showSubtitles ? 'Đã bật phụ đề' : 'Đã tắt phụ đề');
+        }
+
+        function updateSubtitles() {
+            if (!showSubtitles) return;
+            
+            const currentTime = video.currentTime;
+            const currentSubtitles = subtitles[currentSubtitleLanguage];
+            const currentSub = currentSubtitles.find(sub => 
+                currentTime >= sub.start && currentTime <= sub.end
+            );
+            
+            if (currentSub) {
+                subtitleDisplay.textContent = currentSub.text;
+                subtitleDisplay.style.display = 'block';
+            } else {
+                subtitleDisplay.style.display = 'none';
+            }
+        }
+
+        // Helper: update which episode is marked active in the playlist UI
+        function updatePlaylistActive() {
+            const episodeItems = document.querySelectorAll('.episode-item');
+            episodeItems.forEach((item, idx) => {
+                if (idx === currentEpisode - 1) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        function togglePlaylist() {
+            const isShowing = playlistSidebar.classList.contains('show');
+            
+            if (isShowing) {
+                // Hide playlist and restore video
+                playlistSidebar.classList.remove('show');
+                playlistOverlay.classList.remove('show');
+                videoContainer.classList.remove('mini');
+            } else {
+                // Show playlist and minimize video
+                playlistSidebar.classList.add('show');
+                playlistOverlay.classList.add('show');
+                videoContainer.classList.add('mini');
+                showControls();
+            }
+        }
+
+        function selectEpisode(episodeNum, fromSkipButton = false) {
+            // Nếu đang click nút skip, không cho phép chuyển tập
+            if (fromSkipButton) {
+                console.log('Ignoring episode change from skip button');
+                return;
+            }
+
+            console.log('selectEpisode called:', {
+                requestedEpisode: episodeNum,
+                currentEpisode: currentEpisode,
+                videoState: {
+                    currentTime: video.currentTime,
+                    readyState: video.readyState,
+                    paused: video.paused
+                }
+            });
+
+            // Kiểm tra tập phim có tồn tại không
+            if (!episodeData[episodeNum]) {
+                showNotification('Tập phim không tồn tại');
+                return;
+            }
+            
+            // Cập nhật trạng thái active cho item được chọn
+            document.querySelectorAll('.episode-item').forEach(item => item.classList.remove('active'));
+            
+            // Nếu được gọi từ sự kiện click, sử dụng event.currentTarget
+            // Nếu được gọi từ code (như nextEpisode), tìm item tương ứng
+            if (typeof event !== 'undefined' && event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            } else {
+                const episodeItems = document.querySelectorAll('.episode-item');
+                if (episodeItems[episodeNum - 1]) {
+                    episodeItems[episodeNum - 1].classList.add('active');
+                }
+            }
+            
+            // Cập nhật episode hiện tại
+            currentEpisode = episodeNum;
+            // Update playlist UI
+            updatePlaylistActive();
+            
+            // Cập nhật tiêu đề video từ episodeData
+            document.querySelector('.video-title').textContent = "Phàm Nhân Tu Tiên Truyện";
+            document.querySelector('.video-subtitle').textContent = `Phần 1 - ${episodeData[episodeNum].title}`;
+            
+            // Thay đổi nguồn video dựa trên tập được chọn
+            // Trong thực tế, bạn sẽ thay thế URL này bằng URL thực của từng tập
+            const episodeUrls = {
+                1: "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
+                2: "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
+                3: "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
+                4: "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
+                5: "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4"
+            };
+            
+            try {
+                // Cập nhật nguồn video
+                const videoSource = video.querySelector('source');
+                if (videoSource) {
+                    videoSource.src = episodeUrls[episodeNum];
+                    
+                    // Tải lại video với nguồn mới
+                    video.load();
+                    
+                    // Đặt thời gian về đầu và phát
+                    video.currentTime = 0;
+                    
+                    // Sử dụng Promise để đảm bảo video được tải trước khi phát
+                    const playPromise = video.play();
+                    
+                    if (playPromise !== undefined) {
+                        playPromise.then(_ => {
+                            // Phát thành công
+                            showNotification(`Đang phát ${episodeData[episodeNum].title}`);
+                        })
+                        .catch(error => {
+                            // Không thể phát tự động (thường do chính sách của trình duyệt)
+                            showNotification('Nhấn vào video để phát');
+                            console.error('Lỗi phát video:', error);
+                        });
+                    }
+                } else {
+                    showNotification('Không tìm thấy nguồn video');
+                }
+            } catch (error) {
+                console.error('Lỗi khi thay đổi tập phim:', error);
+                showNotification('Có lỗi xảy ra khi thay đổi tập phim');
+            }
+            
+            // Đóng playlist sau khi chọn
+            playlistSidebar.classList.remove('show');
+            playlistOverlay.classList.remove('show');
+            videoContainer.classList.remove('mini');
+        }
+
+        function togglePip() {
+            if (document.pictureInPictureElement) {
+                document.exitPictureInPicture();
+            } else {
+                video.requestPictureInPicture().catch(() => {
+                    showNotification('Trình duyệt không hỗ trợ Picture-in-Picture');
+                });
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                videoContainer.requestFullscreen().catch(() => {
+                    showNotification('Không thể vào chế độ toàn màn hình');
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 60%;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0,0,0,0.9);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 25px;
+                z-index: 1000;
+                font-size: 14px;
+                animation: slideDown 0.3s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => notification.remove(), 2000);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.target.tagName.toLowerCase() === 'input') return;
+            
+            switch(e.key) {
+                case ' ':
+                    e.preventDefault();
+                    togglePlay();
+                    break;
+                case 'f':
+                case 'F':
+                    toggleFullscreen();
+                    break;
+                case 'm':
+                case 'M':
+                    toggleMute();
+                    break;
+                case 'ArrowLeft':
+                    skipTime(-10);
+                    break;
+                case 'ArrowRight':
+                    skipTime(10);
+                    break;
+                case 'c':
+                case 'C':
+                    toggleSubtitles();
+                    break;
+            }
+        });
+
+        // Click on overlay to close playlist
+        playlistOverlay.addEventListener('click', function() {
+            togglePlaylist();
+        });
+
+        // Hide menus when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!qualityMenu.contains(e.target) && !e.target.closest('#qualityBtn')) {
+                qualityMenu.classList.remove('show');
+            }
+            if (!subtitleMenu.contains(e.target) && !e.target.closest('#subtitleBtn')) {
+                subtitleMenu.classList.remove('show');
+            }
+        });
+
+        // Add slide animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideDown {
+                from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+                to { transform: translateX(-50%) translateY(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Save and load progress functions
+        function saveProgress() {
+            localStorage.setItem('videoProgress', video.currentTime);
+            localStorage.setItem('currentEpisode', currentEpisode);
+        }
+        
+        function loadSavedProgress() {
+            try {
+                const savedTime = localStorage.getItem('videoProgress');
+                const savedEpisode = localStorage.getItem('currentEpisode');
+                
+                if (savedEpisode && savedEpisode !== currentEpisode.toString()) {
+                    selectEpisode(parseInt(savedEpisode));
+                    
+                    if (savedTime) {
+                        setTimeout(() => {
+                            video.currentTime = parseFloat(savedTime);
+                        }, 1000);
+                    }
+                } else if (savedTime) {
+                    video.currentTime = parseFloat(savedTime);
+                }
+            } catch (error) {
+                console.error('Lỗi khi tải tiến trình đã lưu:', error);
+            }
+            // Ensure playlist highlights current episode on load
+            updatePlaylistActive();
+        }
+
+        // Skip intro function - Bỏ qua phần giới thiệu
+        let isSkipping = false; // Biến để kiểm soát quá trình skip
+
+        function skipIntro() {
+            // Prevent multiple simultaneous skips
+            if (isSkipping || skipInProgress) {
+                console.log('Skip already in progress');
+                return;
+            }
+
+            // Đảm bảo đang ở đúng tập phim
+            if (!episodeData[currentEpisode]) {
+                console.error('Episode data not found for episode:', currentEpisode);
+                showNotification('Không thể bỏ qua giới thiệu');
+                return;
+            }
+
+            const introEndTime = episodeData[currentEpisode].introEnd;
+            if (typeof introEndTime !== 'number') {
+                console.error('Invalid introEnd time for episode:', currentEpisode);
+                showNotification('Không thể bỏ qua giới thiệu');
+                return;
+            }
+
+            // Nếu đã vượt qua intro, không làm gì cả
+            if (video.currentTime >= introEndTime) {
+                console.log('Already past intro end time');
+                return;
+            }
+
+            console.log('skipIntro called:', {
+                currentTime: video.currentTime,
+                introEnd: introEndTime,
+                currentEpisode: currentEpisode,
+                readyState: video.readyState
+            });
+
+            // Set flags to prevent interference
+            isSkipping = true;
+            skipInProgress = true;
+
+            try {
+                // Sử dụng introEndTime đã được kiểm tra ở trên
+                const introEnd = introEndTime;
+                
+                // Safety check - don't skip if we're past the intro
+                if (video.currentTime >= introEnd) {
+                    console.log('Already past intro end');
+                    isSkipping = false;
+                    skipInProgress = false;
+                    return;
+                }
+
+                // Lưu trạng thái playing
+                const wasPlaying = !video.paused;
+                
+                // Kiểm tra trạng thái seekable của video
+                function isTimeSeekable(time) {
+                    if (!video.seekable || !video.seekable.length) return false;
+                    for (let i = 0; i < video.seekable.length; i++) {
+                        if (time >= video.seekable.start(i) && time <= video.seekable.end(i)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+
+                // Đảm bảo video đã tải đủ để seek
+            if (video.readyState < 3) {
+                console.log('Video not ready, waiting for loadeddata...');
+                const onLoadedData = function() {
+                    video.removeEventListener('loadeddata', onLoadedData);
+                    video.removeEventListener('canplay', onLoadedData);
+                    performSkip(introEnd, wasPlaying);
+                };
+                video.addEventListener('loadeddata', onLoadedData);
+                video.addEventListener('canplay', onLoadedData);
+                return;
+            }
+
+            performSkip(introEnd, wasPlaying);
+
+            } catch (error) {
+                console.error('Error in skipIntro:', error);
+                isSkipping = false;
+                skipInProgress = false;
+                showNotification('Không thể bỏ qua phần giới thiệu');
+            }
+        }
+
+        // Helper function to perform the actual skip
+        function performSkip(targetTime, shouldPlayAfter) {
+            try {
+                console.log('Performing skip to:', targetTime);
+
+                // Ensure we're not at the target already
+                if (Math.abs(video.currentTime - targetTime) <= 0.5) {
+                    console.log('Already at target time');
+                    isSkipping = false;
+                    skipInProgress = false;
+                    return;
+                }
+                
+                // Add seeked listener before setting currentTime
+                const onSeeked = function() {
+                    video.removeEventListener('seeked', onSeeked);
+                    
+                    if (Math.abs(video.currentTime - targetTime) <= 1) {
+                        // Skip successful
+                        console.log('Skip successful, currentTime:', video.currentTime);
+                        skipIntroBtn.classList.remove('show');
+                        
+                        // Resume playback if it was playing
+                        if (shouldPlayAfter) {
+                            video.play().catch(e => {
+                                console.warn('Auto-play after skip failed:', e);
+                                showNotification('Nhấn play để tiếp tục phát');
+                            });
+                        }
+                        
+                        showNotification('Đã bỏ qua phần giới thiệu');
+                    } else {
+                        console.warn('Skip landed at unexpected time:', video.currentTime);
+                        showNotification('Bỏ qua giới thiệu không thành công');
+                    }
+                    
+                    // Reset flags after a short delay
+                    setTimeout(() => {
+                        isSkipping = false;
+                        skipInProgress = false;
+                    }, 300);
+                };
+
+                video.addEventListener('seeked', onSeeked);
+                
+                // Fallback timeout nếu không nhận được sự kiện seeked
+                setTimeout(() => {
+                    if (isSkipping || skipInProgress) {
+                        video.removeEventListener('seeked', onSeeked);
+                        isSkipping = false;
+                        skipInProgress = false;
+                        console.warn('Skip timeout - seeked event never fired');
+                        showNotification('Bỏ qua giới thiệu không thành công');
+                    }
+                }, 3000);
+
+                // Thực hiện seek
+                console.log('Setting currentTime to:', targetTime);
+                video.currentTime = targetTime;
+
+            } catch (error) {
+                console.error('Error in performSkip:', error);
+                isSkipping = false;
+                skipInProgress = false;
+                showNotification('Không thể bỏ qua phần giới thiệu');
+            }
+        }
+        
+        // Check if intro should be shown - Kiểm tra xem có nên hiển thị nút bỏ qua giới thiệu không
+        function checkIntroSkip() {
+            // Kiểm tra thời điểm intro end của tập hiện tại
+            const currentIntroEnd = episodeData[currentEpisode]?.introEnd;
+            if (!currentIntroEnd) {
+                skipIntroBtn.classList.remove('show');
+                return;
+            }
+
+            // Show the skip button during intro regardless of play state
+            const shouldShow = !skipInProgress && 
+                             video.currentTime < currentIntroEnd &&
+                             video.readyState >= 3; // HAVE_FUTURE_DATA
+            
+            const isCurrentlyShown = skipIntroBtn.classList.contains('show');
+            
+            // Log chỉ khi có thay đổi trạng thái
+            if (shouldShow !== isCurrentlyShown) {
+                console.log('checkIntroSkip:', {
+                    shouldShow,
+                    currentTime: video.currentTime,
+                    introEnd: currentIntroEnd,
+                    paused: video.paused,
+                    currentEpisode: currentEpisode,
+                    readyState: video.readyState
+                });
+            }
+
+            if (shouldShow) {
+                skipIntroBtn.classList.add('show');
+            } else {
+                skipIntroBtn.classList.remove('show');
+            }
+        }
+        
+        // Next episode function - Chuyển sang tập tiếp theo
+        function nextEpisode() {
+            if (currentEpisode < Object.keys(episodeData).length) {
+                selectEpisode(currentEpisode + 1);
+                // Không cần thiết lập currentTime và play() vì đã được xử lý trong selectEpisode
+                showNotification('Đang chuyển sang tập tiếp theo');
+            } else {
+                showNotification('Đây là tập cuối cùng');
+            }
+        }
+        
+        // Check if next episode button should be shown - Kiểm tra xem có nên hiển thị nút tập kế tiếp không
+        function checkNextEpisode() {
+            const totalEpisodes = Object.keys(episodeData).length;
+            const remainingTime = video.duration - video.currentTime;
+
+            // Ở tập cuối cùng
+            if (currentEpisode >= totalEpisodes) {
+                nextEpisodeBtn.style.display = 'none';
+                nextEpisodeBtn.classList.remove('show');
+                
+                // Ẩn marker cuối cùng nếu là tập cuối
+                const markers = document.getElementById('progressMarkers');
+                const outroMarker = markers.querySelector('.progress-marker:last-child');
+                if (outroMarker) {
+                    outroMarker.style.display = 'none';
+                }
+                return;
+            }
+
+            // Reset display styles
+            nextEpisodeBtn.style.display = '';
+            const markers = document.getElementById('progressMarkers');
+            const outroMarker = markers.querySelector('.progress-marker:last-child');
+            if (outroMarker) {
+                outroMarker.style.display = '';
+            }
+
+            // Hiển thị nút trong 10 giây cuối
+            if (remainingTime > 0 && remainingTime <= 10) {
+                // Nếu là tập áp chót, hiển thị "Tập cuối"
+                if (currentEpisode === totalEpisodes - 1) {
+                    nextEpisodeBtn.querySelector('span').textContent = 'Tập cuối';
+                } else {
+                    nextEpisodeBtn.querySelector('span').textContent = 'Tập tiếp theo';
+                }
+                nextEpisodeBtn.classList.add('show');
+            } else {
+                nextEpisodeBtn.classList.remove('show');
+            }
+        }
+        
+        // Initialize paused state
+        videoContainer.classList.add('paused');
+
+        // Force check skip button visibility on video events
+        video.addEventListener('loadeddata', checkIntroSkip);
+        video.addEventListener('play', checkIntroSkip);
+        video.addEventListener('pause', checkIntroSkip);
+        
+        // Initial setup
+        setupSkipButton();
+        checkIntroSkip();
+    </script>
+</body>
+</html>
