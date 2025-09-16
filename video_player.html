@@ -273,18 +273,18 @@
         .playlist-sidebar {
             position: fixed;
             top: 0;
-            left: -400px;
+            right: -400px;
             width: 400px;
-            height: 100vh;
+            height: 88vh;
             background: rgba(20,20,20,0.95);
             backdrop-filter: blur(10px);
-            transition: left 0.3s ease;
+            transition: right 0.3s ease;
             z-index: 30;
             overflow-y: auto;
         }
 
         .playlist-sidebar.show {
-            left: 0;
+            right: 0;
         }
 
         .playlist-header {
@@ -400,11 +400,11 @@
         }
 
         .skip-intro-btn {
-            bottom: 140px;
+            bottom: 160px;
         }
 
         .next-episode-btn {
-            bottom: 120px;
+            bottom: 110px;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -759,11 +759,6 @@
 
                 // Only handle clicks on the button or its children
                 if (e.target.closest('#skipIntroBtn')) {
-                    console.log('Skip button clicked:', {
-                        currentEpisode,
-                        currentTime: video.currentTime,
-                        introEnd: episodeData[currentEpisode]?.introEnd
-                    });
 
                     skipIntro();
                 }
@@ -778,13 +773,6 @@
 
         // Initialize
         video.addEventListener('loadedmetadata', function() {
-            console.log('Video loadedmetadata:', {
-                duration: video.duration,
-                currentTime: video.currentTime,
-                readyState: video.readyState,
-                currentEpisode: currentEpisode,
-                src: video.currentSrc
-            });
             updateTimeDisplay();
             loadSavedProgress();
             
@@ -794,18 +782,12 @@
 
         // Add event listener for checking video state
         video.addEventListener('canplay', function() {
-            console.log('Video canplay event:', {
-                currentTime: video.currentTime,
-                currentEpisode: currentEpisode,
-                readyState: video.readyState
-            });
             
             // Video is ready to play — only show skip button when not currently skipping
             // and within intro duration for current episode
             const introEnd = episodeData[currentEpisode]?.introEnd;
             if (!skipInProgress && introEnd && video.currentTime < introEnd) {
                 skipIntroBtn.classList.add('show');
-                console.log('Show skip intro button');
             }
         });
 
@@ -827,16 +809,6 @@
         }
         
         video.addEventListener('timeupdate', function() {
-            // Log on first timeupdate after loading
-            if (video.currentTime < 0.1) {
-                console.log('Video started playing:', {
-                    currentTime: video.currentTime,
-                    currentEpisode: currentEpisode,
-                    readyState: video.readyState,
-                    skipInProgress: skipInProgress,
-                    isSkipping: isSkipping
-                });
-            }
             
             lastTime = video.currentTime;
             lastTimeUpdate = Date.now();
@@ -1105,19 +1077,8 @@
         function selectEpisode(episodeNum, fromSkipButton = false) {
             // Nếu đang click nút skip, không cho phép chuyển tập
             if (fromSkipButton) {
-                console.log('Ignoring episode change from skip button');
                 return;
             }
-
-            console.log('selectEpisode called:', {
-                requestedEpisode: episodeNum,
-                currentEpisode: currentEpisode,
-                videoState: {
-                    currentTime: video.currentTime,
-                    readyState: video.readyState,
-                    paused: video.paused
-                }
-            });
 
             // Kiểm tra tập phim có tồn tại không
             if (!episodeData[episodeNum]) {
@@ -1329,7 +1290,6 @@
         function skipIntro() {
             // Prevent multiple simultaneous skips
             if (isSkipping || skipInProgress) {
-                console.log('Skip already in progress');
                 return;
             }
 
@@ -1349,16 +1309,8 @@
 
             // Nếu đã vượt qua intro, không làm gì cả
             if (video.currentTime >= introEndTime) {
-                console.log('Already past intro end time');
                 return;
             }
-
-            console.log('skipIntro called:', {
-                currentTime: video.currentTime,
-                introEnd: introEndTime,
-                currentEpisode: currentEpisode,
-                readyState: video.readyState
-            });
 
             // Set flags to prevent interference
             isSkipping = true;
@@ -1370,7 +1322,6 @@
                 
                 // Safety check - don't skip if we're past the intro
                 if (video.currentTime >= introEnd) {
-                    console.log('Already past intro end');
                     isSkipping = false;
                     skipInProgress = false;
                     return;
@@ -1392,7 +1343,6 @@
 
                 // Đảm bảo video đã tải đủ để seek
             if (video.readyState < 3) {
-                console.log('Video not ready, waiting for loadeddata...');
                 const onLoadedData = function() {
                     video.removeEventListener('loadeddata', onLoadedData);
                     video.removeEventListener('canplay', onLoadedData);
@@ -1416,11 +1366,9 @@
         // Helper function to perform the actual skip
         function performSkip(targetTime, shouldPlayAfter) {
             try {
-                console.log('Performing skip to:', targetTime);
 
                 // Ensure we're not at the target already
                 if (Math.abs(video.currentTime - targetTime) <= 0.5) {
-                    console.log('Already at target time');
                     isSkipping = false;
                     skipInProgress = false;
                     return;
@@ -1432,7 +1380,6 @@
                     
                     if (Math.abs(video.currentTime - targetTime) <= 1) {
                         // Skip successful
-                        console.log('Skip successful, currentTime:', video.currentTime);
                         skipIntroBtn.classList.remove('show');
                         
                         // Resume playback if it was playing
@@ -1470,7 +1417,6 @@
                 }, 3000);
 
                 // Thực hiện seek
-                console.log('Setting currentTime to:', targetTime);
                 video.currentTime = targetTime;
 
             } catch (error) {
@@ -1497,17 +1443,6 @@
             
             const isCurrentlyShown = skipIntroBtn.classList.contains('show');
             
-            // Log chỉ khi có thay đổi trạng thái
-            if (shouldShow !== isCurrentlyShown) {
-                console.log('checkIntroSkip:', {
-                    shouldShow,
-                    currentTime: video.currentTime,
-                    introEnd: currentIntroEnd,
-                    paused: video.paused,
-                    currentEpisode: currentEpisode,
-                    readyState: video.readyState
-                });
-            }
 
             if (shouldShow) {
                 skipIntroBtn.classList.add('show');
