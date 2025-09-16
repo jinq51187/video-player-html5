@@ -25,10 +25,11 @@
             background: #000;
         }
 
+        
         video {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: cover; /* Changed to cover for full screen display */
         }
 
         .video-header {
@@ -469,7 +470,7 @@
     <div class="playlist-overlay" id="playlistOverlay"></div>
 
     <div class="video-container" id="videoContainer">
-        <video id="mainVideo" preload="metadata">
+        <video id="mainVideo" preload="metadata" autoplay>
             <source src="https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4" type="video/mp4">
         </video>
 
@@ -726,7 +727,6 @@
         // Setup skip button with proper event handling
         function setupSkipButton() {
             if (!skipIntroBtn) {
-                console.error('Skip button not found');
                 return;
             }
 
@@ -800,7 +800,7 @@
                 const playPromise = video.play();
                 if (playPromise !== undefined) {
                     playPromise.catch(error => {
-                        console.error('Error attempting to play:', error);
+                       // console.error('Error attempting to play:', error);
                     });
                 }
             } else {
@@ -1142,14 +1142,12 @@
                         .catch(error => {
                             // Không thể phát tự động (thường do chính sách của trình duyệt)
                             showNotification('Nhấn vào video để phát');
-                            console.error('Lỗi phát video:', error);
                         });
                     }
                 } else {
                     showNotification('Không tìm thấy nguồn video');
                 }
             } catch (error) {
-                console.error('Lỗi khi thay đổi tập phim:', error);
                 showNotification('Có lỗi xảy ra khi thay đổi tập phim');
             }
             
@@ -1278,7 +1276,7 @@
                     video.currentTime = parseFloat(savedTime);
                 }
             } catch (error) {
-                console.error('Lỗi khi tải tiến trình đã lưu:', error);
+               // console.error('Lỗi khi tải tiến trình đã lưu:', error);
             }
             // Ensure playlist highlights current episode on load
             updatePlaylistActive();
@@ -1295,14 +1293,12 @@
 
             // Đảm bảo đang ở đúng tập phim
             if (!episodeData[currentEpisode]) {
-                console.error('Episode data not found for episode:', currentEpisode);
                 showNotification('Không thể bỏ qua giới thiệu');
                 return;
             }
 
             const introEndTime = episodeData[currentEpisode].introEnd;
             if (typeof introEndTime !== 'number') {
-                console.error('Invalid introEnd time for episode:', currentEpisode);
                 showNotification('Không thể bỏ qua giới thiệu');
                 return;
             }
@@ -1356,7 +1352,6 @@
             performSkip(introEnd, wasPlaying);
 
             } catch (error) {
-                console.error('Error in skipIntro:', error);
                 isSkipping = false;
                 skipInProgress = false;
                 showNotification('Không thể bỏ qua phần giới thiệu');
@@ -1420,7 +1415,6 @@
                 video.currentTime = targetTime;
 
             } catch (error) {
-                console.error('Error in performSkip:', error);
                 isSkipping = false;
                 skipInProgress = false;
                 showNotification('Không thể bỏ qua phần giới thiệu');
