@@ -1496,7 +1496,10 @@
                 nextEpisodeBtn.classList.remove('show');
             }
         }
-        
+        // Tự động chuyển tập khi video kết thúc
+		video.addEventListener('ended', function() {
+		    nextEpisode();
+		});
         // Initialize paused state
         videoContainer.classList.add('paused');
 
