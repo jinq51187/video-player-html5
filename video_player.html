@@ -851,25 +851,25 @@
         let currentEpisode = 1;
         let showSubtitles = true;
         let currentSubtitleLanguage = 'vi';
-const progressBuffered = document.getElementById('progressBuffered');
+		const progressBuffered = document.getElementById('progressBuffered');
 
-function updateBuffered() {
-    if (video.buffered.length > 0 && video.duration) {
-        // lấy buffer đến cuối cùng
-        const bufferedEnd = video.buffered.end(video.buffered.length - 1);
-        const percent = (bufferedEnd / video.duration) * 100;
-        progressBuffered.style.width = percent + '%';
-    }
-}
+		function updateBuffered() {
+		    if (video.buffered.length > 0 && video.duration) {
+		        // lấy buffer đến cuối cùng
+		        const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+		        const percent = (bufferedEnd / video.duration) * 100;
+		        progressBuffered.style.width = percent + '%';
+		    }
+		}
 
-// gọi khi có dữ liệu mới
-video.addEventListener('progress', updateBuffered);
-video.addEventListener('loadedmetadata', updateBuffered);
+		// gọi khi có dữ liệu mới
+		video.addEventListener('progress', updateBuffered);
+		video.addEventListener('loadedmetadata', updateBuffered);
 
-// gọi thêm mỗi lần timeupdate để "refresh"
-video.addEventListener('timeupdate', updateBuffered);
+		// gọi thêm mỗi lần timeupdate để "refresh"
+		video.addEventListener('timeupdate', updateBuffered);
 
-video.addEventListener('click', togglePlay);
+		video.addEventListener('click', togglePlay);
 
 
 		function showTimePreview(time, x, y) {
@@ -1013,13 +1013,17 @@ video.addEventListener('click', togglePlay);
             });
         }
 
-        video.addEventListener('loadedmetadata', function() {
-            updateTimeDisplay();
-            loadSavedProgress();
-            setupSkipButton();
-            previewCanvas.width = 160;
-            previewCanvas.height = 90;
-        });
+		video.addEventListener('loadedmetadata', function() {
+		    updateTimeDisplay();
+		    loadSavedProgress();
+		    setupSkipButton();
+		    previewCanvas.width = 160;
+		    previewCanvas.height = 90;
+		    
+      		updateBuffered()
+		    // Kiểm tra resume;
+		    checkResumeWatching();
+		});
 
         video.addEventListener('canplay', function() {
             const introEnd = episodeData[currentEpisode]?.introEnd;
@@ -1537,45 +1541,33 @@ video.addEventListener('click', togglePlay);
 
         
         // Hàm tiếp tục xem
-        function continueWatching() {
-            resumeModal.classList.remove('show');
-            // Video sẽ tiếp tục từ vị trí đã lưu
-            video.play().catch(() => {
-                showNotification('Nhấn vào video để phát');
-            });
-        }
-
-        // Hàm xem từ đầu
-        function restartVideo() {
-            resumeModal.classList.remove('show');
-            video.currentTime = 0;
-            video.play().catch(() => {
-                showNotification('Nhấn vào video để phát');
-            });
-        }
+         function continueWatching() {
+	      resumeModal.classList.remove('show');
+	      const savedTime = parseFloat(localStorage.getItem('videoProgress') || '0');
+	      video.currentTime = savedTime;
+	      video.play().catch(()=>{});
+	    }
+		// Phát lại từ đầu
+	    function restartVideo() {
+	      resumeModal.classList.remove('show');
+	      video.currentTime = 0;
+	      video.play().catch(()=>{});
+	    }
 
         // Kiểm tra và hiển thị modal "Tiếp tục xem"
         function checkResumeWatching() {
-            try {
-                const savedTime = parseFloat(localStorage.getItem('videoProgress') || '0');
-                const savedEpisode = parseInt(localStorage.getItem('currentEpisode') || '1');
-                
-                // Chỉ hiển thị nếu đã xem ít nhất 30 giây và chưa xem hết
-                if (savedTime > 30 && savedTime < (video.duration - 30)) {
-                    resumeTime.textContent = formatTime(savedTime);
-                    
-                    // Hiển thị modal sau khi video load xong
-                    setTimeout(() => {
-                        resumeModal.classList.add('show');
-                    }, 1000);
-                    
-                    return true;
-                }
-            } catch (error) {
-                console.log('Resume check failed:', error);
-            }
-            return false;
-        }
+	      try {
+	        const savedTime = parseFloat(localStorage.getItem('videoProgress') || '0');
+	        const savedEpisode = parseInt(localStorage.getItem('currentEpisode') || '1');
+	        if (savedEpisode !== currentEpisode) return;
+	        if (savedTime > 30 && savedTime < (video.duration - 30)) {
+	          resumeTime.textContent = formatTime(savedTime);
+	          resumeModal.classList.add('show');
+	          video.pause();
+	        }
+	      } catch {}
+	    }
+
 
         
 
@@ -1688,5 +1680,7 @@ video.addEventListener('click', togglePlay);
         video.addEventListener('contextmenu', preventRightClick);
         document.addEventListener('contextmenu', preventRightClick);
     </script>
+    <script src="ads.js"></script>
+
 </body>
 </html>
