@@ -25,11 +25,10 @@
             background: #000;
         }
 
-        
         video {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Changed to cover for full screen display */
+            object-fit: cover;
         }
 
         .video-header {
@@ -79,6 +78,7 @@
 
         .progress-container {
             margin-bottom: 15px;
+            position: relative;
         }
 
         .progress-bar {
@@ -132,6 +132,38 @@
 
         .progress-bar:hover .progress-handle {
             opacity: 1;
+        }
+
+        .progress-buffered {
+		    position: absolute;
+		    top: 0;
+		    left: 0;
+		    height: 100%;
+		    background: rgba(255,255,255,0.5); /* màu load trước */
+		    border-radius: 2px;
+		    width: 0%;
+		    z-index: 1;
+		}
+
+        .thumbnail-preview {
+            position: absolute;
+            bottom: 25px;
+            width: 160px;
+            height: 90px;
+            background: #000 url('') no-repeat center center;
+            background-size: cover;
+            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 4px;
+            opacity: 0;
+            transform: translateX(-50%) scale(0.8);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .progress-container:hover .thumbnail-preview.show {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
         }
 
         .controls-main {
@@ -204,20 +236,25 @@
         }
 
         .subtitle-display {
-            position: absolute;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-size: 18px;
-            font-weight: 500;
-            text-align: center;
-            max-width: 80%;
-            line-height: 1.4;
-            display: none;
-        }
+		  position: absolute;
+		  left: 50%;
+		  transform: translateX(-50%);
+		  bottom: 60px; /* luôn cách đáy 60px */
+		  background: rgba(0,0,0,0.8);
+		  padding: 8px 16px;
+		  border-radius: 4px;
+		  font-size: 18px;
+		  font-weight: 500;
+		  text-align: center;
+		  max-width: 80%;
+		  line-height: 1.4;
+		  display: none;
+		  transition: bottom 0.3s ease; /* để dịch mượt */
+		}
+		.video-container.show-controls .subtitle-display {
+		  bottom: 120px; /* 60px (mặc định) + 60px (khoảng cách với progress bar) */
+		}
+
 
         .settings-menu {
             position: absolute;
@@ -460,20 +497,138 @@
             }
         }
 
-        @keyframes slideDown {
-            from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
-            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .resume-watching {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            z-index: 100;
+            text-align: center;
+            min-width: 300px;
+            display: none;
         }
+
+        .resume-watching.show {
+            display: block;
+            animation: fadeInScale 0.3s ease;
+        }
+
+        .resume-watching h3 {
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .resume-watching p {
+            margin-bottom: 20px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .resume-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .resume-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .resume-btn.primary {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .resume-btn.secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .resume-btn:hover {
+            transform: scale(1.05);
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        #thumbnailPreview {
+		  position: absolute;
+		  bottom: 40px;
+		  transform: translateX(-50%);
+		  width: 160px;
+		  height: 90px;
+		  border-radius: 6px;
+		  background: #000 center/cover no-repeat;
+		  color: #fff;
+		  font-size: 12px;
+		  text-align: center;
+		  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+		  display: none;
+		  pointer-events: none;
+		  border: 2px solid #ffffff; /* cùng màu progress */
+		}
+
+		#thumbnailPreview::after {
+		  content: "";
+		  position: absolute;
+		  bottom: -8px; /* mũi tên hướng xuống */
+		  left: 50%;
+		  transform: translateX(-50%);
+		  border-width: 8px 8px 0 8px;
+		  border-style: solid;
+		  border-color: #ffffff transparent transparent transparent; /* cùng màu progress */
+		}
+
+
+		
+		#thumbnailPreview img {
+		  width: 100%;
+		  height: 100%;
+		  object-fit: cover;
+		}
+		#thumbnailPreview .label {
+		  position: absolute;
+		  bottom: 0;
+		  width: 100%;
+		  padding: 2px 0;
+		  font-size: 12px;
+		  text-align: center;
+		  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+		  color: #fff;
+		}
+
+
     </style>
 </head>
 <body>
     <div class="playlist-overlay" id="playlistOverlay"></div>
+    
+    <div class="resume-watching" id="resumeModal">
+        <h3>Tiếp tục xem?</h3>
+        <p>Bạn đã xem đến <span id="resumeTime">0:00</span></p>
+        <div class="resume-buttons">
+            <button class="resume-btn primary" onclick="continueWatching()">Tiếp tục xem</button>
+            <button class="resume-btn secondary" onclick="restartVideo()">Xem từ đầu</button>
+        </div>
+    </div>
 
     <div class="video-container" id="videoContainer">
-        <video id="mainVideo" preload="metadata" autoplay>
+        <video id="mainVideo" preload="metadata" autoplay crossorigin="anonymous">
             <source src="https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4" type="video/mp4">
         </video>
-
+		<div id="thumbnailPreview" style="position:absolute; display:none;"></div>
+		<canvas id="hiddenCanvas" style="display:none;"></canvas>
+		
         <div class="video-header">
             <div class="video-title">Phàm Nhân Tu Tiên Truyện</div>
             <div class="video-subtitle" style="padding-left: 20px">Phần 1 - Tập 1</div>
@@ -504,7 +659,9 @@
 
         <div class="controls-overlay">
             <div class="progress-container">
+                <div class="thumbnail-preview" id="thumbnailPreview"></div>
                 <div class="progress-bar" id="progressBar" onclick="seekTo(event)">
+    				<div class="progress-buffered" id="progressBuffered"></div>
                     <div class="progress-filled" id="progressFilled"></div>
                     <div class="progress-markers" id="progressMarkers"></div>
                     <div class="progress-handle"></div>
@@ -540,10 +697,24 @@
                 </div>
 
                 <div class="controls-right">
-                    <button class="control-btn" id="subtitleBtn" onclick="toggleSubtitleMenu()">CC</button>
-                    <button class="control-btn" onclick="togglePlaylist()">📋</button>
+                    <button class="control-btn" id="subtitleBtn" onclick="toggleSubtitleMenu()">cc</button>
+                    <button class="control-btn" id="playlistBtn" onclick="togglePlaylist()" aria-label="Danh sách tập" title="Danh sách tập">
+					  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+					    <rect x="3" y="5" width="12" height="2" rx="1" fill="currentColor"/>
+					    <rect x="3" y="10.5" width="12" height="2" rx="1" fill="currentColor"/>
+					    <rect x="3" y="16" width="12" height="2" rx="1" fill="currentColor"/>
+					    <rect x="18" y="7" width="3" height="3" rx="0.6" fill="currentColor"/>
+					    <rect x="18" y="14" width="3" height="3" rx="0.6" fill="currentColor"/>
+					  </svg>
+					</button>
                     <button class="control-btn" id="qualityBtn" onclick="toggleQualityMenu()">1080P</button>
-                    <button class="control-btn" onclick="togglePip()">📺</button>
+                    <button class="control-btn" id="pipBtn" onclick="togglePip()" aria-label="Hình trong hình" title="Hình trong hình">
+					  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					    <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+					    <path d="M13 5h6v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+					    <path d="M13 11l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+					  </svg>
+					</button>
                     <button class="control-btn" onclick="toggleFullscreen()">⛶</button>
                 </div>
             </div>
@@ -644,9 +815,10 @@
 
     <script>
     	const TIMING_CONFIG = {
-            introEnd: 12,     // Intro ends at 30 seconds for all episodes
-            outroStart: 10    // Outro starts at 50 seconds for all episodes
+            introEnd: 12,
+            outroStart: 10
         };
+        
         const video = document.getElementById('mainVideo');
         const videoContainer = document.getElementById('videoContainer');
         const playBtn = document.getElementById('playBtn');
@@ -664,20 +836,71 @@
         const subtitleBtn = document.getElementById('subtitleBtn');
         const playlistOverlay = document.getElementById('playlistOverlay');
         const nextEpisodeBtn = document.getElementById('nextEpisodeBtn');
-        // Sử dụng let thay vì const cho skipIntroBtn vì chúng ta sẽ gán lại giá trị cho nó
         let skipIntroBtn = document.getElementById('skipIntroBtn');
+        const resumeModal = document.getElementById('resumeModal');
+        const resumeTime = document.getElementById('resumeTime');
+        const canvas = document.getElementById("hiddenCanvas");
+        const thumbnailPreview = document.getElementById('thumbnailPreview');
+        const progressContainer = document.querySelector('.progress-container');
+        const previewCanvas = document.createElement('canvas');
+        const previewCtx = previewCanvas.getContext('2d');
+        let previewUpdateTimeout;
 
         let isPlaying = false;
         let controlsTimeout;
         let currentEpisode = 1;
         let showSubtitles = true;
         let currentSubtitleLanguage = 'vi';
-        let skipButtonClicked = false; // Flag to track if skip button was clicked
-	    // Timing state for progress saving and updates
-	    let lastTime = 0;
-	    let lastTimeUpdate = Date.now();
+const progressBuffered = document.getElementById('progressBuffered');
 
-        // Enhanced subtitles with multiple languages
+function updateBuffered() {
+    if (video.buffered.length > 0 && video.duration) {
+        // lấy buffer đến cuối cùng
+        const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+        const percent = (bufferedEnd / video.duration) * 100;
+        progressBuffered.style.width = percent + '%';
+    }
+}
+
+// gọi khi có dữ liệu mới
+video.addEventListener('progress', updateBuffered);
+video.addEventListener('loadedmetadata', updateBuffered);
+
+// gọi thêm mỗi lần timeupdate để "refresh"
+video.addEventListener('timeupdate', updateBuffered);
+
+video.addEventListener('click', togglePlay);
+
+
+		function showTimePreview(time, x, y) {
+		  thumbnailPreview.style.left = x + "px";
+		  thumbnailPreview.style.top = (y - 100) + "px"; 
+		  thumbnailPreview.style.display = "block";
+
+		  if (!isFinite(time)) return;
+
+		  const thumbVideo = document.createElement("video");
+		  thumbVideo.src = video.currentSrc;
+		  thumbVideo.crossOrigin = "anonymous";
+		  thumbVideo.currentTime = time; // lúc này time chắc chắn là số
+		  thumbVideo.muted = true;
+		  thumbVideo.playsInline = true;
+
+		  thumbnailPreview.innerHTML = "";
+		  thumbnailPreview.appendChild(thumbVideo);
+
+		  thumbVideo.addEventListener("seeked", () => {
+		    thumbVideo.pause();
+		  });
+		}
+
+
+		function formatTime(sec) {
+		  const m = Math.floor(sec / 60);
+		  const s = Math.floor(sec % 60);
+		  return `${m}:${s.toString().padStart(2, '0')}`;
+		}
+
         const subtitles = {
             vi: [
                 {start: 2, end: 6, text: "Chào mừng đến với thế giới tu tiên"},
@@ -699,7 +922,6 @@
             ]
         };
 
-        // Episode data - Thông tin chi tiết về từng tập
         const episodeData = {
             1: {title: "Tập 1: Khởi đầu hành trình", duration: "50:58", introEnd: TIMING_CONFIG.introEnd, outroStart: TIMING_CONFIG.outroStart},
             2: {title: "Tập 2: Tu luyện đầu tiên", duration: "48:32", introEnd: TIMING_CONFIG.introEnd, outroStart: TIMING_CONFIG.outroStart},
@@ -708,15 +930,43 @@
             5: {title: "Tập 5: Bí thuật tu tiên", duration: "51:28", introEnd: TIMING_CONFIG.introEnd, outroStart: TIMING_CONFIG.outroStart}
         };
 
-        // Initialize episode click handler
+
+		progressContainer.addEventListener("mousemove", function(event) {
+		  if (!video.duration) return;
+
+		  const rect = progressBar.getBoundingClientRect();
+		  const percent = (event.clientX - rect.left) / rect.width;
+		  const time = percent * video.duration;
+		  if (!isFinite(time)) return;
+
+		  // Tính toán vị trí
+		  thumbnailPreview.style.left = event.clientX + "px";
+		  thumbnailPreview.style.display = "block";
+
+		  // Hiện thời gian (fallback khi chưa có frame)
+		  thumbnailPreview.innerHTML = `<div style="line-height:90px">${formatTime(time)}</div>`;
+
+		  clearTimeout(previewUpdateTimeout);
+		  previewUpdateTimeout = setTimeout(() => {
+		    generateThumbnail(time);
+		  }, 150);
+		  showTimePreview(time, event.clientX, rect.top); // truyền đúng time
+		});
+
+		progressContainer.addEventListener("mouseleave", function() {
+		  thumbnailPreview.style.display = "none";
+		});
+
+        video.addEventListener('ended', function() {
+            nextEpisode();
+        });
+
         const playlistContent = document.querySelector('.playlist-content');
         if (playlistContent) {
             playlistContent.addEventListener('click', function(e) {
-                // Find closest episode item if clicked on child element
                 const episodeItem = e.target.closest('.episode-item');
                 if (!episodeItem) return;
 
-                // Get episode number from data attribute
                 const episodeNum = parseInt(episodeItem.dataset.episode, 10);
                 if (!isNaN(episodeNum)) {
                     selectEpisode(episodeNum);
@@ -724,13 +974,9 @@
             });
         }
 
-        // Setup skip button with proper event handling
         function setupSkipButton() {
-            if (!skipIntroBtn) {
-                return;
-            }
+            if (!skipIntroBtn) return;
 
-            // Remove any existing click handlers by cloning button
             const wrapper = document.createElement('div');
             wrapper.className = 'skip-intro-wrapper';
             wrapper.style.position = 'absolute';
@@ -750,58 +996,45 @@
                 skipIntroBtn.classList.add('show');
             }
 
-            // Add click handler to wrapper to ensure event isolation
             wrapper.addEventListener('click', function(e) {
-                // Stop event immediately
                 e.preventDefault();
                 e.stopPropagation();
                 e.stopImmediatePropagation();
 
-                // Only handle clicks on the button or its children
                 if (e.target.closest('#skipIntroBtn')) {
-
                     skipIntro();
                 }
 
                 return false;
             }, {
-                capture: true,    // Handle event in capture phase
-                passive: false,   // Allow preventDefault
-                once: false       // Keep handler active
+                capture: true,
+                passive: false,
+                once: false
             });
         }
 
-        // Initialize
         video.addEventListener('loadedmetadata', function() {
             updateTimeDisplay();
             loadSavedProgress();
-            
-            // Set up skip button with new event handling
             setupSkipButton();
+            previewCanvas.width = 160;
+            previewCanvas.height = 90;
         });
 
-        // Add event listener for checking video state
         video.addEventListener('canplay', function() {
-            
-            // Video is ready to play — only show skip button when not currently skipping
-            // and within intro duration for current episode
             const introEnd = episodeData[currentEpisode]?.introEnd;
             if (!skipInProgress && introEnd && video.currentTime < introEnd) {
                 skipIntroBtn.classList.add('show');
             }
         });
 
-        // Biến để kiểm soát việc bỏ qua intro
         let skipInProgress = false;
 
-        // Hàm xử lý play/pause video
         function togglePlay() {
             if (video.paused) {
                 const playPromise = video.play();
                 if (playPromise !== undefined) {
-                    playPromise.catch(error => {
-                       // console.error('Error attempting to play:', error);
-                    });
+                    playPromise.catch(error => {});
                 }
             } else {
                 video.pause();
@@ -809,11 +1042,9 @@
         }
         
         video.addEventListener('timeupdate', function() {
-            
             lastTime = video.currentTime;
             lastTimeUpdate = Date.now();
             
-            // Nếu đang trong quá trình skip intro, chỉ cập nhật UI cần thiết
             if (skipInProgress || isSkipping) {
                 updateProgress();
                 updateTimeDisplay();
@@ -851,7 +1082,6 @@
             centerPlayBtn.innerHTML = playing ? centerPauseIcon : centerPlayIcon;
         }
 
-        // Show/hide controls
         videoContainer.addEventListener('mousemove', showControls);
         videoContainer.addEventListener('mouseleave', hideControlsDelayed);
 
@@ -871,14 +1101,6 @@
             }, 3000);
         }
 
-        function togglePlay() {
-            if (video.paused) {
-                video.play();
-            } else {
-                video.pause();
-            }
-        }
-
         function skipTime(seconds) {
             video.currentTime = Math.max(0, Math.min(video.currentTime + seconds, video.duration));
         }
@@ -894,7 +1116,6 @@
                 const percent = (video.currentTime / video.duration) * 100;
                 progressFilled.style.width = percent + '%';
                 
-                // Update progress handle position
                 const handle = progressBar.querySelector('.progress-handle');
                 if (handle) {
                     handle.style.left = `${percent}%`;
@@ -908,7 +1129,6 @@
             const markersContainer = document.getElementById('progressMarkers');
             markersContainer.innerHTML = '';
 
-            // Hiển thị marker cho phần "Bỏ qua giới thiệu" (0-10 giây)
             if (video.currentTime < TIMING_CONFIG.introEnd) {
                 const introMarker = document.createElement('div');
                 introMarker.className = 'progress-marker';
@@ -917,7 +1137,6 @@
                 markersContainer.appendChild(introMarker);
             }
 
-            // Hiển thị marker cho phần "Tập tiếp theo" (10 giây cuối)
             const outroMarker = document.createElement('div');
             outroMarker.className = 'progress-marker';
             outroMarker.style.right = '0%';
@@ -969,23 +1188,16 @@
         }
 
         function setQuality(quality, element) {
-            // Remove active from all quality items
             document.querySelectorAll('#qualityMenu .settings-item').forEach(item => {
                 item.classList.remove('active');
                 const checkmark = item.querySelector('.checkmark');
-                if (checkmark) {
-                    checkmark.textContent = '';
-                }
+                if (checkmark) checkmark.textContent = '';
             });
             
-            // Set active on clicked item
             element.classList.add('active');
             const checkmark = element.querySelector('.checkmark');
-            if (checkmark) {
-                checkmark.textContent = '✓';
-            }
+            if (checkmark) checkmark.textContent = '✓';
             
-            // Update button text
             qualityBtn.textContent = quality;
             
             showNotification(`Đã chuyển sang chất lượng ${quality}`);
@@ -993,23 +1205,16 @@
         }
 
         function setSubtitle(language, element, enabled) {
-            // Remove active from all subtitle items
             document.querySelectorAll('#subtitleMenu .settings-item').forEach(item => {
                 item.classList.remove('active');
                 const checkmark = item.querySelector('.checkmark');
-                if (checkmark) {
-                    checkmark.textContent = '';
-                }
+                if (checkmark) checkmark.textContent = '';
             });
             
-            // Set active on clicked item
             element.classList.add('active');
             const checkmark = element.querySelector('.checkmark');
-            if (checkmark) {
-                checkmark.textContent = '✓';
-            }
+            if (checkmark) checkmark.textContent = '✓';
             
-            // Update subtitle state
             showSubtitles = enabled;
             if (enabled) {
                 currentSubtitleLanguage = element.getAttribute('data-subtitle');
@@ -1045,7 +1250,6 @@
             }
         }
 
-        // Helper: update which episode is marked active in the playlist UI
         function updatePlaylistActive() {
             const episodeItems = document.querySelectorAll('.episode-item');
             episodeItems.forEach((item, idx) => {
@@ -1061,12 +1265,10 @@
             const isShowing = playlistSidebar.classList.contains('show');
             
             if (isShowing) {
-                // Hide playlist and restore video
                 playlistSidebar.classList.remove('show');
                 playlistOverlay.classList.remove('show');
                 videoContainer.classList.remove('mini');
             } else {
-                // Show playlist and minimize video
                 playlistSidebar.classList.add('show');
                 playlistOverlay.classList.add('show');
                 videoContainer.classList.add('mini');
@@ -1075,22 +1277,14 @@
         }
 
         function selectEpisode(episodeNum, fromSkipButton = false) {
-            // Nếu đang click nút skip, không cho phép chuyển tập
-            if (fromSkipButton) {
-                return;
-            }
-
-            // Kiểm tra tập phim có tồn tại không
+            if (fromSkipButton) return;
             if (!episodeData[episodeNum]) {
                 showNotification('Tập phim không tồn tại');
                 return;
             }
             
-            // Cập nhật trạng thái active cho item được chọn
             document.querySelectorAll('.episode-item').forEach(item => item.classList.remove('active'));
             
-            // Nếu được gọi từ sự kiện click, sử dụng event.currentTarget
-            // Nếu được gọi từ code (như nextEpisode), tìm item tương ứng
             if (typeof event !== 'undefined' && event && event.currentTarget) {
                 event.currentTarget.classList.add('active');
             } else {
@@ -1100,17 +1294,12 @@
                 }
             }
             
-            // Cập nhật episode hiện tại
             currentEpisode = episodeNum;
-            // Update playlist UI
             updatePlaylistActive();
             
-            // Cập nhật tiêu đề video từ episodeData
             document.querySelector('.video-title').textContent = "Phàm Nhân Tu Tiên Truyện";
             document.querySelector('.video-subtitle').textContent = `Phần 1 - ${episodeData[episodeNum].title}`;
             
-            // Thay đổi nguồn video dựa trên tập được chọn
-            // Trong thực tế, bạn sẽ thay thế URL này bằng URL thực của từng tập
             const episodeUrls = {
                 1: "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
                 2: "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
@@ -1120,27 +1309,18 @@
             };
             
             try {
-                // Cập nhật nguồn video
                 const videoSource = video.querySelector('source');
                 if (videoSource) {
                     videoSource.src = episodeUrls[episodeNum];
-                    
-                    // Tải lại video với nguồn mới
                     video.load();
-                    
-                    // Đặt thời gian về đầu và phát
                     video.currentTime = 0;
                     
-                    // Sử dụng Promise để đảm bảo video được tải trước khi phát
                     const playPromise = video.play();
                     
                     if (playPromise !== undefined) {
                         playPromise.then(_ => {
-                            // Phát thành công
                             showNotification(`Đang phát ${episodeData[episodeNum].title}`);
-                        })
-                        .catch(error => {
-                            // Không thể phát tự động (thường do chính sách của trình duyệt)
+                        }).catch(error => {
                             showNotification('Nhấn vào video để phát');
                         });
                     }
@@ -1151,7 +1331,6 @@
                 showNotification('Có lỗi xảy ra khi thay đổi tập phim');
             }
             
-            // Đóng playlist sau khi chọn
             playlistSidebar.classList.remove('show');
             playlistOverlay.classList.remove('show');
             videoContainer.classList.remove('mini');
@@ -1194,46 +1373,15 @@
             `;
             notification.textContent = message;
             document.body.appendChild(notification);
-
             setTimeout(() => notification.remove(), 2000);
         }
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if (e.target.tagName.toLowerCase() === 'input') return;
-            
-            switch(e.key) {
-                case ' ':
-                    e.preventDefault();
-                    togglePlay();
-                    break;
-                case 'f':
-                case 'F':
-                    toggleFullscreen();
-                    break;
-                case 'm':
-                case 'M':
-                    toggleMute();
-                    break;
-                case 'ArrowLeft':
-                    skipTime(-10);
-                    break;
-                case 'ArrowRight':
-                    skipTime(10);
-                    break;
-                case 'c':
-                case 'C':
-                    toggleSubtitles();
-                    break;
-            }
-        });
+        
 
-        // Click on overlay to close playlist
         playlistOverlay.addEventListener('click', function() {
             togglePlaylist();
         });
 
-        // Hide menus when clicking outside
         document.addEventListener('click', function(e) {
             if (!qualityMenu.contains(e.target) && !e.target.closest('#qualityBtn')) {
                 qualityMenu.classList.remove('show');
@@ -1243,20 +1391,17 @@
             }
         });
 
-        // Add slide animation
         const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideDown {
-                from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
-                to { transform: translateX(-50%) translateY(0); opacity: 1; }
-            }
-        `;
+        style.textContent = `@keyframes slideDown { from { transform: translateX(-50%) translateY(-20px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }`;
         document.head.appendChild(style);
 
-        // Save and load progress functions
         function saveProgress() {
-            localStorage.setItem('videoProgress', video.currentTime);
-            localStorage.setItem('currentEpisode', currentEpisode);
+            try {
+                localStorage.setItem('videoProgress', video.currentTime);
+                localStorage.setItem('currentEpisode', currentEpisode);
+            } catch (error) {
+                // Handle storage errors silently
+            }
         }
         
         function loadSavedProgress() {
@@ -1266,91 +1411,32 @@
                 
                 if (savedEpisode && savedEpisode !== currentEpisode.toString()) {
                     selectEpisode(parseInt(savedEpisode));
-                    
                     if (savedTime) {
-                        setTimeout(() => {
-                            video.currentTime = parseFloat(savedTime);
-                        }, 1000);
+                        setTimeout(() => { video.currentTime = parseFloat(savedTime); }, 1000);
                     }
                 } else if (savedTime) {
                     video.currentTime = parseFloat(savedTime);
                 }
             } catch (error) {
-               // console.error('Lỗi khi tải tiến trình đã lưu:', error);
+                // Handle storage errors silently
             }
-            // Ensure playlist highlights current episode on load
             updatePlaylistActive();
         }
 
-        // Skip intro function - Bỏ qua phần giới thiệu
-        let isSkipping = false; // Biến để kiểm soát quá trình skip
+        let isSkipping = false;
 
         function skipIntro() {
-            // Prevent multiple simultaneous skips
-            if (isSkipping || skipInProgress) {
-                return;
-            }
-
-            // Đảm bảo đang ở đúng tập phim
+            if (isSkipping || skipInProgress) return;
             if (!episodeData[currentEpisode]) {
                 showNotification('Không thể bỏ qua giới thiệu');
                 return;
             }
-
             const introEndTime = episodeData[currentEpisode].introEnd;
-            if (typeof introEndTime !== 'number') {
-                showNotification('Không thể bỏ qua giới thiệu');
-                return;
-            }
-
-            // Nếu đã vượt qua intro, không làm gì cả
-            if (video.currentTime >= introEndTime) {
-                return;
-            }
-
-            // Set flags to prevent interference
+            if (typeof introEndTime !== 'number' || video.currentTime >= introEndTime) return;
             isSkipping = true;
             skipInProgress = true;
-
             try {
-                // Sử dụng introEndTime đã được kiểm tra ở trên
-                const introEnd = introEndTime;
-                
-                // Safety check - don't skip if we're past the intro
-                if (video.currentTime >= introEnd) {
-                    isSkipping = false;
-                    skipInProgress = false;
-                    return;
-                }
-
-                // Lưu trạng thái playing
-                const wasPlaying = !video.paused;
-                
-                // Kiểm tra trạng thái seekable của video
-                function isTimeSeekable(time) {
-                    if (!video.seekable || !video.seekable.length) return false;
-                    for (let i = 0; i < video.seekable.length; i++) {
-                        if (time >= video.seekable.start(i) && time <= video.seekable.end(i)) {
-                            return true;
-                        }
-                    }
-                    return false;
-                }
-
-                // Đảm bảo video đã tải đủ để seek
-            if (video.readyState < 3) {
-                const onLoadedData = function() {
-                    video.removeEventListener('loadeddata', onLoadedData);
-                    video.removeEventListener('canplay', onLoadedData);
-                    performSkip(introEnd, wasPlaying);
-                };
-                video.addEventListener('loadeddata', onLoadedData);
-                video.addEventListener('canplay', onLoadedData);
-                return;
-            }
-
-            performSkip(introEnd, wasPlaying);
-
+                performSkip(introEndTime, !video.paused);
             } catch (error) {
                 isSkipping = false;
                 skipInProgress = false;
@@ -1358,62 +1444,38 @@
             }
         }
 
-        // Helper function to perform the actual skip
         function performSkip(targetTime, shouldPlayAfter) {
             try {
-
-                // Ensure we're not at the target already
                 if (Math.abs(video.currentTime - targetTime) <= 0.5) {
                     isSkipping = false;
                     skipInProgress = false;
                     return;
                 }
-                
-                // Add seeked listener before setting currentTime
                 const onSeeked = function() {
                     video.removeEventListener('seeked', onSeeked);
-                    
                     if (Math.abs(video.currentTime - targetTime) <= 1) {
-                        // Skip successful
                         skipIntroBtn.classList.remove('show');
-                        
-                        // Resume playback if it was playing
                         if (shouldPlayAfter) {
                             video.play().catch(e => {
-                                console.warn('Auto-play after skip failed:', e);
                                 showNotification('Nhấn play để tiếp tục phát');
                             });
                         }
-                        
                         showNotification('Đã bỏ qua phần giới thiệu');
                     } else {
-                        console.warn('Skip landed at unexpected time:', video.currentTime);
                         showNotification('Bỏ qua giới thiệu không thành công');
                     }
-                    
-                    // Reset flags after a short delay
-                    setTimeout(() => {
-                        isSkipping = false;
-                        skipInProgress = false;
-                    }, 300);
+                    setTimeout(() => { isSkipping = false; skipInProgress = false; }, 300);
                 };
-
                 video.addEventListener('seeked', onSeeked);
-                
-                // Fallback timeout nếu không nhận được sự kiện seeked
                 setTimeout(() => {
                     if (isSkipping || skipInProgress) {
                         video.removeEventListener('seeked', onSeeked);
                         isSkipping = false;
                         skipInProgress = false;
-                        console.warn('Skip timeout - seeked event never fired');
                         showNotification('Bỏ qua giới thiệu không thành công');
                     }
                 }, 3000);
-
-                // Thực hiện seek
                 video.currentTime = targetTime;
-
             } catch (error) {
                 isSkipping = false;
                 skipInProgress = false;
@@ -1421,23 +1483,13 @@
             }
         }
         
-        // Check if intro should be shown - Kiểm tra xem có nên hiển thị nút bỏ qua giới thiệu không
         function checkIntroSkip() {
-            // Kiểm tra thời điểm intro end của tập hiện tại
             const currentIntroEnd = episodeData[currentEpisode]?.introEnd;
             if (!currentIntroEnd) {
                 skipIntroBtn.classList.remove('show');
                 return;
             }
-
-            // Show the skip button during intro regardless of play state
-            const shouldShow = !skipInProgress && 
-                             video.currentTime < currentIntroEnd &&
-                             video.readyState >= 3; // HAVE_FUTURE_DATA
-            
-            const isCurrentlyShown = skipIntroBtn.classList.contains('show');
-            
-
+            const shouldShow = !skipInProgress && video.currentTime < currentIntroEnd && video.readyState >= 3;
             if (shouldShow) {
                 skipIntroBtn.classList.add('show');
             } else {
@@ -1445,47 +1497,31 @@
             }
         }
         
-        // Next episode function - Chuyển sang tập tiếp theo
         function nextEpisode() {
             if (currentEpisode < Object.keys(episodeData).length) {
                 selectEpisode(currentEpisode + 1);
-                // Không cần thiết lập currentTime và play() vì đã được xử lý trong selectEpisode
                 showNotification('Đang chuyển sang tập tiếp theo');
             } else {
                 showNotification('Đây là tập cuối cùng');
             }
         }
         
-        // Check if next episode button should be shown - Kiểm tra xem có nên hiển thị nút tập kế tiếp không
         function checkNextEpisode() {
             const totalEpisodes = Object.keys(episodeData).length;
             const remainingTime = video.duration - video.currentTime;
-
-            // Ở tập cuối cùng
             if (currentEpisode >= totalEpisodes) {
                 nextEpisodeBtn.style.display = 'none';
                 nextEpisodeBtn.classList.remove('show');
-                
-                // Ẩn marker cuối cùng nếu là tập cuối
                 const markers = document.getElementById('progressMarkers');
                 const outroMarker = markers.querySelector('.progress-marker:last-child');
-                if (outroMarker) {
-                    outroMarker.style.display = 'none';
-                }
+                if (outroMarker) outroMarker.style.display = 'none';
                 return;
             }
-
-            // Reset display styles
             nextEpisodeBtn.style.display = '';
             const markers = document.getElementById('progressMarkers');
             const outroMarker = markers.querySelector('.progress-marker:last-child');
-            if (outroMarker) {
-                outroMarker.style.display = '';
-            }
-
-            // Hiển thị nút trong 10 giây cuối
+            if (outroMarker) outroMarker.style.display = '';
             if (remainingTime > 0 && remainingTime <= TIMING_CONFIG.outroStart) {
-                // Nếu là tập áp chót, hiển thị "Tập cuối"
                 if (currentEpisode === totalEpisodes - 1) {
                     nextEpisodeBtn.querySelector('span').textContent = 'Tập cuối';
                 } else {
@@ -1496,21 +1532,161 @@
                 nextEpisodeBtn.classList.remove('show');
             }
         }
-        // Tự động chuyển tập khi video kết thúc
-		video.addEventListener('ended', function() {
-		    nextEpisode();
-		});
-        // Initialize paused state
-        videoContainer.classList.add('paused');
 
-        // Force check skip button visibility on video events
+       
+
+        
+        // Hàm tiếp tục xem
+        function continueWatching() {
+            resumeModal.classList.remove('show');
+            // Video sẽ tiếp tục từ vị trí đã lưu
+            video.play().catch(() => {
+                showNotification('Nhấn vào video để phát');
+            });
+        }
+
+        // Hàm xem từ đầu
+        function restartVideo() {
+            resumeModal.classList.remove('show');
+            video.currentTime = 0;
+            video.play().catch(() => {
+                showNotification('Nhấn vào video để phát');
+            });
+        }
+
+        // Kiểm tra và hiển thị modal "Tiếp tục xem"
+        function checkResumeWatching() {
+            try {
+                const savedTime = parseFloat(localStorage.getItem('videoProgress') || '0');
+                const savedEpisode = parseInt(localStorage.getItem('currentEpisode') || '1');
+                
+                // Chỉ hiển thị nếu đã xem ít nhất 30 giây và chưa xem hết
+                if (savedTime > 30 && savedTime < (video.duration - 30)) {
+                    resumeTime.textContent = formatTime(savedTime);
+                    
+                    // Hiển thị modal sau khi video load xong
+                    setTimeout(() => {
+                        resumeModal.classList.add('show');
+                    }, 1000);
+                    
+                    return true;
+                }
+            } catch (error) {
+                console.log('Resume check failed:', error);
+            }
+            return false;
+        }
+
+        
+
+
+        function generateThumbnail(time) {
+            // Tạo video clone để không ảnh hưởng đến video chính
+            if (!window.tempPreviewVideo) {
+                window.tempPreviewVideo = document.createElement('video');
+                window.tempPreviewVideo.crossOrigin = "anonymous";
+                window.tempPreviewVideo.muted = true;
+                window.tempPreviewVideo.preload = "metadata";
+                window.tempPreviewVideo.style.display = "none";
+                document.body.appendChild(window.tempPreviewVideo);
+            }
+
+            const tempVideo = window.tempPreviewVideo;
+            
+            // Đặt nguồn video giống với video chính nếu chưa có
+            if (tempVideo.src !== video.src) {
+                tempVideo.src = video.src;
+                tempVideo.load();
+            }
+
+            try {
+                // Đợi video sẵn sàng
+                if (tempVideo.readyState < 2) {
+                    tempVideo.addEventListener('loadedmetadata', function() {
+                        generateThumbnailFromVideo(tempVideo, time);
+                    }, { once: true });
+                    return;
+                }
+                
+                generateThumbnailFromVideo(tempVideo, time);
+                
+            } catch (error) {
+                console.warn("Lỗi khi tạo thumbnail:", error);
+                showFallbackThumbnail(time);
+            }
+        }
+
+        function generateThumbnailFromVideo(tempVideo, time) {
+            try {
+                tempVideo.currentTime = time;
+                
+                tempVideo.addEventListener('seeked', function() {
+                    try {
+                        // Tính toán kích thước canvas
+                        const aspectRatio = tempVideo.videoWidth / tempVideo.videoHeight || 16/9;
+                        const canvasWidth = 160;
+                        const canvasHeight = canvasWidth / aspectRatio;
+                        
+                        previewCanvas.width = canvasWidth;
+                        previewCanvas.height = canvasHeight;
+                        
+                        // Clear canvas trước khi vẽ
+                        previewCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+                        
+                        // Vẽ frame video lên canvas
+                        previewCtx.drawImage(tempVideo, 0, 0, canvasWidth, canvasHeight);
+                        
+                        // Chuyển thành data URL
+                        const dataURL = previewCanvas.toDataURL('image/jpeg', 0.7);
+                        
+                        // Cập nhật thumbnail
+                        thumbnailPreview.style.backgroundImage = `url('${dataURL}')`;
+                        thumbnailPreview.style.backgroundColor = 'transparent';
+                        
+                    } catch (e) {
+                        console.warn("Không thể vẽ thumbnail:", e);
+                        showFallbackThumbnail(time);
+                    }
+                }, { once: true });
+                
+            } catch (error) {
+                console.warn("Lỗi khi seek video:", error);
+                showFallbackThumbnail(time);
+            }
+        }
+
+        function showFallbackThumbnail(time) {
+            // Hiển thị thời gian thay thế nếu không thể tạo thumbnail
+            thumbnailPreview.style.backgroundImage = 'none';
+            thumbnailPreview.style.backgroundColor = '#333';
+            thumbnailPreview.innerHTML = `<div style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                color: white;
+                font-size: 12px;
+                font-weight: bold;
+            ">${formatTime(time)}</div>`;
+        }
+        
+        videoContainer.classList.add('paused');
         video.addEventListener('loadeddata', checkIntroSkip);
         video.addEventListener('play', checkIntroSkip);
         video.addEventListener('pause', checkIntroSkip);
         
-        // Initial setup
         setupSkipButton();
         checkIntroSkip();
+        
+        function preventRightClick(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            showNotification('Chức năng này đã bị vô hiệu hóa');
+            return false;
+        }
+        
+        video.addEventListener('contextmenu', preventRightClick);
+        document.addEventListener('contextmenu', preventRightClick);
     </script>
 </body>
 </html>
